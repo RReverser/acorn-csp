@@ -1,0 +1,31 @@
+{
+  "name": "acorn-csp",
+  "version": "0.0.1",
+  "description": "Builder for Acorn that precompiles predicates in order to satisfy CSP.",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/RReverser/acorn-csp"
+  },
+  "keywords": [
+    "acorn",
+    "content",
+    "security",
+    "policy",
+    "build"
+  ],
+  "author": "Ingvar Stepanyan <me@rreverser.com> (https://rreverser.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RReverser/acorn-csp/issues"
+  },
+  "homepage": "https://github.com/RReverser/acorn-csp",
+  "dependencies": {
+    "esprima": "^1.2.2",
+    "recast": "^0.7.1"
+  }
+}
