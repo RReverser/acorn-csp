@@ -1,7 +1,7 @@
 acorn-csp
 =========
 
-Builder for Acorn that precompiles predicates in order to satisfy Content Security Policy (CSP).
+Builder for Acorn that precompiles and inlines predicates in order to satisfy Content Security Policy (CSP).
 
 This workaround addresses [acorn#90](https://github.com/marijnh/acorn/issues/90) and [acorn#123](https://github.com/marijnh/acorn/issues/123) issues.
 
