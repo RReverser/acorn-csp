@@ -11,6 +11,6 @@ For generating CSP-safe version, execute following command:
 acorn-csp <destination filename> [path to acorn]
 ```
 
-And use generated file instead of original one Acorn.
+And use generated file instead of original Acorn's `acorn.js`.
 
 When path to acorn is not specified, it's assumed to be available as `require('acorn')` from current directory.
