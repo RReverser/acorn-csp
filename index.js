@@ -66,9 +66,6 @@ vm.runInNewContext(
 // Remove wrapper.
 makePredicatePath.parentPath.get(makePredicatePath.name + 1).replace();
 
-// Rename original function back.
-makePredicatePath.get('id').node.name = 'makePredicate';
-
 // And generate it's body as hash of collected inputs/outputs.
 makePredicatePath.get('body', 'body').replace([b.returnStatement(
 	b.memberExpression(
