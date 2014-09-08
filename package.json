@@ -1,6 +1,6 @@
 {
   "name": "acorn-csp",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Builder for Acorn that precompiles predicates in order to satisfy CSP.",
   "main": "index.js",
   "bin": "index.js",

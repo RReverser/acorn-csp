@@ -29,17 +29,17 @@ recast.visit(ast, {
 		if (node.id.name === 'makePredicate') {
 			// Found makePredicate function.
 			makePredicatePath = path;
-			// Rename it temporarily.
-			node.id.name = '_makePredicate';
 			// And provide wrapper that collects all the possible results.
-			var wrapperNode = esprima.parse(
-				'function makePredicate(words) {' +
-				'  var generatedFn = _makePredicate(words);' +
-				'  makePredicateCache[words] = generatedFn.toString();' +
-				'  return generatedFn;' +
-				'}'
-			).body[0];
-			path.insertAfter(wrapperNode);
+			path.insertAfter(b.expressionStatement(
+				b.assignmentExpression(
+					'=',
+					node.id,
+					b.callExpression(
+						b.identifier('wrapMakePredicate'),
+						[node.id]
+					)
+				)
+			));
 			return false;
 		} else {
 			this.traverse(path);
@@ -48,9 +48,19 @@ recast.visit(ast, {
 });
 
 // Execute instrumented code and collect possible predicates.
+var makePredicateCache = Object.create(null);
+
 vm.runInNewContext(
 	recast.prettyPrint(ast).code,
-	{makePredicateCache: makePredicateCache}
+	{
+		wrapMakePredicate: function (makePredicate) {
+			return function (words) {
+				var generatedFn = makePredicate(words);
+				makePredicateCache[words] = generatedFn.toString();
+				return generatedFn;
+			};
+		}
+	}
 );
 
 // Remove wrapper.
