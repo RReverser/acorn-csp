@@ -20,8 +20,8 @@ var b = recast.types.builders;
 var source = fs.readFileSync(srcPath, 'utf-8');
 var ast = recast.parse(source, {esprima: esprima});
 
-// Instrument code with predicate collector.
-var makePredicatePath, makePredicateCache = {};
+// Instrument code.
+var makePredicatePath;
 
 recast.visit(ast, {
 	visitFunctionDeclaration: function (path) {
