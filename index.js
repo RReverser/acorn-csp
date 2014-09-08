@@ -10,16 +10,18 @@ if (!destPath) {
 	process.exit(1);
 }
 
+var fs = require('fs');
 var vm = require('vm');
 var esprima = require('esprima');
 var recast = require('recast');
-var fs = require('fs');
+var b = recast.types.builders;
 
-// Reading original Acorn's source with conservative parser (recast).
+// Read original Acorn's source with conservative parser (recast).
 var source = fs.readFileSync(srcPath, 'utf-8');
 var ast = recast.parse(source, {esprima: esprima});
 
-var makePredicatePath;
+// Instrument code with predicate collector.
+var makePredicatePath, makePredicateCache = {};
 
 recast.visit(ast, {
 	visitFunctionDeclaration: function (path) {
@@ -46,8 +48,6 @@ recast.visit(ast, {
 });
 
 // Execute instrumented code and collect possible predicates.
-var makePredicateCache = {};
-
 vm.runInNewContext(
 	recast.prettyPrint(ast).code,
 	{makePredicateCache: makePredicateCache}
@@ -59,28 +59,21 @@ makePredicatePath.parentPath.get(makePredicatePath.name + 1).replace();
 // Rename original function back.
 makePredicatePath.get('id').node.name = 'makePredicate';
 
-// And generate it's body as hash of collected possible inputs/outputs.
-makePredicatePath.get('body', 'body').replace([{
-	type: 'ReturnStatement',
-	argument: {
-		type: 'MemberExpression',
-		object: {
-			type: 'ObjectExpression',
-			properties: Object.keys(makePredicateCache).map(function (key) {
-				var fnNode = esprima.parse('(' + this[key] + ')').body[0].expression;
-				fnNode.id = null;
-				return {
-					type: 'Property',
-					kind: 'init',
-					key: {type: 'Literal', value: key},
-					value: fnNode
-				};
-			}, makePredicateCache)
-		},
-		computed: true,
-		property: makePredicatePath.get('params', 0).node
-	}
-}]);
+// And generate it's body as hash of collected inputs/outputs.
+makePredicatePath.get('body', 'body').replace([b.returnStatement(
+	b.memberExpression(
+		b.objectExpression(Object.keys(makePredicateCache).map(function (key) {
+			var funcNode = esprima.parse(makePredicateCache[key]).body[0];
+			return b.property('init', b.literal(key), b.functionExpression(
+				null,
+				funcNode.params,
+				funcNode.body
+			));
+		})),
+		makePredicatePath.get('params', 0).node,
+		true
+	)
+)]);
 
 // Finally, save transformed AST to file with preserved formatting.
 fs.writeFileSync(destPath, recast.print(ast).code);
